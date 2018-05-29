@@ -299,6 +299,9 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
                 PHAsset *pickedAsset = [PHAsset fetchAssetsWithALAssetURLs:@[imageURL] options:nil].lastObject;
                 NSString *originalFilename = [self originalFilenameForAsset:pickedAsset assetType:PHAssetResourceTypePhoto];
                 self.response[@"fileName"] = originalFilename ?: [NSNull null];
+                if (pickedAsset.localIdentifier) {
+                    self.response[@"localIdentifier"] = pickedAsset.localIdentifier;
+                }
                 if (pickedAsset.location) {
                     self.response[@"latitude"] = @(pickedAsset.location.coordinate.latitude);
                     self.response[@"longitude"] = @(pickedAsset.location.coordinate.longitude);
