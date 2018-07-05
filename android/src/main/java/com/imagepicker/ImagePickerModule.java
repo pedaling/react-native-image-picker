@@ -103,6 +103,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       if (!permissionsGranted)
       {
         responseHelper.invokeError(callback, "Permissions weren't granted");
+        callback = null;
         return false;
       }
 
@@ -138,6 +139,10 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
 
   @ReactMethod
   public void showImagePicker(final ReadableMap options, final Callback callback) {
+    if (this.callback != null) {
+      return;
+    }
+
     Activity currentActivity = getCurrentActivity();
 
     if (currentActivity == null)
@@ -198,7 +203,8 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
 
   public void doOnCancel()
   {
-    responseHelper.invokeCancel(callback);
+    responseHelper.invokeCancel(this.callback);
+    this.callback = null;
   }
 
   public void launchCamera()
@@ -224,8 +230,9 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     }
 
     this.options = options;
+    this.callback = callback;
 
-    if (!permissionsCheck(currentActivity, callback, REQUEST_PERMISSIONS_FOR_CAMERA))
+    if (!permissionsCheck(currentActivity, REQUEST_PERMISSIONS_FOR_CAMERA))
     {
       return;
     }
@@ -312,8 +319,9 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     }
 
     this.options = options;
+    this.callback = callback;
 
-    if (!permissionsCheck(currentActivity, callback, REQUEST_PERMISSIONS_FOR_LIBRARY))
+    if (!permissionsCheck(currentActivity, REQUEST_PERMISSIONS_FOR_LIBRARY))
     {
       return;
     }
@@ -537,7 +545,6 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
   }
 
   private boolean permissionsCheck(@NonNull final Activity activity,
-                                   @NonNull final Callback callback,
                                    @NonNull final int requestCode)
   {
     final int writePermission = ActivityCompat
@@ -587,6 +594,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
                       return;
                     }
                     innerActivity.startActivityForResult(intent, 1);
+                    callback = null;
                   }
                 });
         if (dialog != null) {
